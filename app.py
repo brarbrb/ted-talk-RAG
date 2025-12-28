@@ -4,40 +4,31 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import numpy as np
 import requests
+from pinecone import Pinecone
 
 # ---- Load env ----
 load_dotenv()
 
-# ---- Config (match your notebook variables) ----
+# ---- Config ----
 BASE_URL = "https://api.llmod.ai/v1"
 EMBED_MODEL = "RPRTHPB-text-embedding-3-small"
 CHAT_MODEL = "RPRTHPB-gpt-5-mini"
 EMBED_DIMS = 1536
 
-# RAG hyperparameters you choose & must report
-RAG_CHUNK_SIZE = 2048         # as you defined (approx tokens / max tokens)
-RAG_OVERLAP_RATIO = 0.30
-RAG_TOP_K = 5                 # tune later (1..30)
+# RAG hyperparameters (for reporting)
+RAG_CHUNK_SIZE = 512         
+RAG_OVERLAP_RATIO = 0.1
+RAG_TOP_K = 20                
 
-assert RAG_CHUNK_SIZE <= 2048
-assert 0 <= RAG_OVERLAP_RATIO <= 0.30
-assert 1 <= RAG_TOP_K <= 30
 
 # ---- Keys ----
 LLMOD_API_KEY = os.getenv("LLMOD_API_KEY")
-if not LLMOD_API_KEY:
-    raise ValueError("Missing LLMOD_API_KEY in env (.env).")
-
 HEADERS = {"Authorization": f"Bearer {LLMOD_API_KEY}", "Content-Type": "application/json"}
 
 # ---- Pinecone ----
-from pinecone import Pinecone
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-if not PINECONE_API_KEY:
-    raise ValueError("Missing PINECONE_API_KEY in env (.env).")
-
-INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "ted")
+INDEX_NAME = "ted"
 
 pc = Pinecone(api_key=PINECONE_API_KEY)
 index = pc.Index(INDEX_NAME)
@@ -48,7 +39,7 @@ only based on the TED dataset context provided to you (metadata
 and transcript passages). You must not use any external
 knowledge, the open internet, or information that is not explicitly
 contained in the retrieved context. If the answer cannot be
-determined from the provided context, respond: “I don’t know
+determined from the provided context, respond: “I don't know
 based on the provided TED data.” Always explain your answer
 using the given context, quoting or paraphrasing the relevant
 transcript or metadata when helpful.
@@ -149,7 +140,6 @@ def call_chat_model(question: str, context: str):
     payload = {
         "model": CHAT_MODEL,
         "messages": messages,
-        # do NOT add temperature unless it is exactly 1 for this model family
     }
 
     max_retries = 6
@@ -176,7 +166,6 @@ def call_chat_model(question: str, context: str):
 
 def rag_answer(question: str, top_k: int):
     matches = retrieve_from_pinecone(question, top_k=top_k)
-
     # context array in the exact output format the assignment wants
     context_array = []
     for m in matches:
@@ -201,7 +190,6 @@ app = Flask(__name__)
 
 @app.get("/api/stats")
 def api_stats():
-    # Strict JSON field names required by assignment
     return jsonify({
         "chunk_size": int(RAG_CHUNK_SIZE),
         "overlap_ratio": float(RAG_OVERLAP_RATIO),
