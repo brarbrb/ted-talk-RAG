@@ -14,7 +14,9 @@ Note: The final  selected RAG hyperparameters are:
 - overlap_ratio = 0.1 (smaller overlap)
 - top_k = 20 (but much higher k retrieved docs)
 
-To run the `embeding_RAG_tuning.ipynb` heavier dependencies are neded (I put them in different file), Run this line:
+To run the `embeding_RAG_tuning.ipynb` heavier dependencies are neded (I put them in different file).
+
+Run this line:
 ```bash
 pip install -r heavier_requirements.txt
 ```
