@@ -12,6 +12,6 @@ pip install -r requirements.txt
 ```
 
 Note: The final  selected RAG hyperparameters are:
-- chunk_size = 1024
-- overlap_ratio = 0.15
+- chunk_size = 758
+- overlap_ratio = 0.1
 - top_k = 5

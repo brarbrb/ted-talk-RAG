@@ -16,7 +16,7 @@ CHAT_MODEL = "RPRTHPB-gpt-5-mini"
 EMBED_DIMS = 1536
 
 # RAG hyperparameters (for reporting)
-RAG_CHUNK_SIZE = 512         
+RAG_CHUNK_SIZE = 758         
 RAG_OVERLAP_RATIO = 0.1
 RAG_TOP_K = 20                
 
